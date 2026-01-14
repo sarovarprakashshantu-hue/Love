@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>For RUH❤️</title>
+<title>For Ruh ❤️</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
 
@@ -80,7 +80,7 @@
 
 <div id="start-screen" onclick="startExperience()">
   <div class="heart-main">❤️</div>
-  <div class="tap-text"> TAP FOR RUH ❤🍁</div>
+  <div class="tap-text">TAP FOR RUH </div>
 </div>
 
 <canvas id="bgCanvas"></canvas>
@@ -100,7 +100,7 @@ const bgCtx = bgCanvas.getContext("2d");
 const tCanvas = document.getElementById("treeCanvas");
 const tCtx = tCanvas.getContext("2d");
 
-let message = RUH❤️";
+let message = "MISS YOU 🌹";
 let treeQueue = [];
 let textIndex = 0;
 let floatingHearts = [];
@@ -140,7 +140,7 @@ class Heart {
   draw() {
     bgCtx.globalAlpha = this.opacity;
     bgCtx.font = `${this.size}px serif`;
-    bgCtx.fillText("🍫", this.x, this.y);
+    bgCtx.fillText("❤️🍫", this.x, this.y);
   }
 }
 
@@ -149,7 +149,7 @@ function startExperience() {
   setTimeout(() => document.getElementById("start-screen").remove(), 1500);
   document.getElementById("music").play().catch(() => {});
 
-  for(let i=0; i<25; i++) floatingHearts.push(new Heart with teddy ());
+  for(let i=0; i<25; i++) floatingHearts.push(new Heart());
 
   // मोबाइल फ्रेंडली साइजिंग
   const isMobile = window.innerWidth < 600;

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>For Ruh ❤️</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+  body, html {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  canvas {
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  #text-container {
+    position: absolute;
+    bottom: 12%; 
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  #typewriter {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(26px, 8vw, 42px);
+    color: #ff4d6d;
+    text-shadow: 0 0 15px #ff4d6d, 0 0 30px #ff0040;
+    display: inline-block;
+    padding: 0 10px;
+  }
+
+  #start-screen {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, #200005 0%, #000 100%);
+    color: #ff4d6d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    text-align: center;
+    transition: opacity 1.5s ease;
+  }
+
+  .heart-main {
+    font-size: 100px;
+    filter: drop-shadow(0 0 20px #ff0040);
+    animation: pulse 1.5s infinite ease-in-out;
+    cursor: pointer;
+  }
+
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+  .tap-text {
+    font-family: sans-serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    margin-top: 30px;
+    opacity: 0.8;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="start-screen" onclick="startExperience()">
+  <div class="heart-main">❤️</div>
+  <div class="tap-text">TAP FOR RUH</div>
+</div>
+
+<canvas id="bgCanvas"></canvas>
+<canvas id="treeCanvas"></canvas>
+
+<div id="text-container">
+  <span id="typewriter"></span>
+</div>
+
+<audio id="music" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const bgCanvas = document.getElementById("bgCanvas");
+const bgCtx = bgCanvas.getContext("2d");
+const tCanvas = document.getElementById("treeCanvas");
+const tCtx = tCanvas.getContext("2d");
+
+let message = "MISS YOU RUH 🌹";
+let treeQueue = [];
+let textIndex = 0;
+let floatingHearts = [];
+let particles = []; // Separate array for touch effects
+
+function resize() {
+  bgCanvas.width = tCanvas.width = window.innerWidth;
+  bgCanvas.height = tCanvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+class Heart {
+  constructor(isTouch = false, x = 0, y = 0) {
+    this.isTouch = isTouch;
+    this.reset(isTouch, x, y);
+  }
+  reset(isTouch, x, y) {
+    this.x = isTouch ? x : Math.random() * bgCanvas.width;
+    this.y = isTouch ? y : bgCanvas.height + 20;
+    this.size = isTouch ? Math.random() * 20 + 10 : Math.random() * 10 + 5;
+    this.speedX = isTouch ? (Math.random() - 0.5) * 6 : 0;
+    this.speedY = isTouch ? (Math.random() - 2) * 4 : -(Math.random() * 1 + 0.5);
+    this.opacity = 1;
+  }
+  update() {
+    this.y += this.speedY;
+    this.x += this.speedX;
+    if (this.isTouch) this.opacity -= 0.02; // Fade out touch hearts
+    
+    if (this.y < -50 || this.opacity <= 0) {
+      if (!this.isTouch) {
+        this.reset(false);
+        return true;
+      }
+      return false; // Remove touch hearts
+    }
+    return true;
+  }
+  draw(ctx) {
+    ctx.globalAlpha = this.opacity;
+    ctx.font = `${this.size}px serif`;
+    // Drawing a mix of heart and chocolate
+    ctx.fillText(this.isTouch ? "❤️" : "💗", this.x, this.y);
+  }
+}
+
+function startExperience() {
+  const startScreen = document.getElementById("start-screen");
+  startScreen.style.opacity = "0";
+  setTimeout(() => startScreen.remove(), 1500);
+  
+  const audio = document.getElementById("music");
+  audio.play().catch(e => console.log("Audio play deferred"));
+
+  for(let i=0; i<20; i++) floatingHearts.push(new Heart(false));
+
+  const isMobile = window.innerWidth < 600;
+  const treeBaseY = tCanvas.height * 0.8;
+  const branchLen = isMobile ? tCanvas.height * 0.1 : tCanvas.height * 0.15;
+
+  initTree(tCanvas.width / 2, treeBaseY, branchLen, -90, isMobile ? 8 : 10);
+  animate();
+  setTimeout(typeWriter, 1000);
+}
+
+function initTree(x, y, len, angle, depth) {
+  if (depth === 0) {
+    treeQueue.push(() => {
+      tCtx.fillStyle = "#ff4d6d";
+      tCtx.shadowBlur = 10;
+      tCtx.shadowColor = "#ff0040";
+      tCtx.beginPath();
+      tCtx.arc(x, y, Math.random() * 4 + 2, 0, Math.PI * 2);
+      tCtx.fill();
+    });
+    return;
+  }
+
+  treeQueue.push(() => {
+    let rad = angle * (Math.PI / 180);
+    let nx = x + Math.cos(rad) * len;
+    let ny = y + Math.sin(rad) * len;
+
+    tCtx.beginPath();
+    tCtx.strokeStyle = `hsl(345, 100%, ${40 + (10-depth)*4}%)`;
+    tCtx.lineWidth = depth * 0.8;
+    tCtx.lineCap = "round";
+    tCtx.moveTo(x, y);
+    tCtx.lineTo(nx, ny);
+    tCtx.stroke();
+
+    initTree(nx, ny, len * 0.75, angle - 25, depth - 1);
+    initTree(nx, ny, len * 0.75, angle + 25, depth - 1);
+  });
+}
+
+function typeWriter() {
+  if (textIndex < message.length) {
+    document.getElementById("typewriter").innerHTML += message.charAt(textIndex);
+    textIndex++;
+    setTimeout(typeWriter, 150);
+  }
+}
+
+function animate() {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  // Update and draw background hearts
+  floatingHearts.forEach(h => {
+    h.update();
+    h.draw(bgCtx);
+  });
+
+  // Update and draw touch particles
+  particles = particles.filter(p => {
+    let alive = p.update();
+    if (alive) p.draw(bgCtx);
+    return alive;
+  });
+
+  // Draw tree segments over time
+  if (treeQueue.length > 0) {
+    let steps = Math.min(treeQueue.length, 5);
+    for(let i=0; i<steps; i++) {
+        let drawFunc = treeQueue.shift();
+        if(drawFunc) drawFunc();
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+// Touch/Click interaction
+const handleInteraction = (x, y) => {
+  for(let i=0; i<6; i++) {
+    particles.push(new Heart(true, x, y));
+  }
+};
+
+window.addEventListener('touchstart', (e) => handleInteraction(e.touches[0].clientX, e.touches[0].clientY));
+window.addEventListener('mousedown', (e) => handleInteraction(e.clientX, e.clientY));
+</script>
+</body>
+</html>

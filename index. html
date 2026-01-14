@@ -80,7 +80,7 @@
 
 <div id="start-screen" onclick="startExperience()">
   <div class="heart-main">❤️</div>
-  <div class="tap-text">TAP FOR RUH ❤🍁</div>
+  <div class="tap-text"> TAP FOR RUH ❤🍁</div>
 </div>
 
 <canvas id="bgCanvas"></canvas>
